@@ -10,8 +10,8 @@ using namespace std;
 int main()
 {
 	string transactionType, clientName;
-	int numShares, priorTransactions, upperFloor, discountLevel1, discountLevel2, lowerBase, level1Base, level2Base;
-	double sharePrice, pricePoint, upperCommission, lowerCommission, finalDiscount, finalCommission;
+	int numShares, priorTransactions, upperFloor, lowerBase, level1Base, level2Base;
+	double principal, sharePrice, pricePoint, discountLevel1, discountLevel2, upperCommission, lowerCommission, discount, commission, netAmount;
 
 	pricePoint = 1.00; //Share price determines the commission schedule
 	level1Base = 30; //minimum prior transactions for discount level 1
@@ -20,8 +20,8 @@ int main()
 	//Define commission schedule for stocks above price point:
 	upperCommission = 0.025; //commission per share
 	upperFloor = 25; //minimum commission
-	discountLevel1 = 10; //discount for level 1
-	discountLevel2 = 25; //discount for level 2
+	discountLevel1 = .10; //discount for level 1
+	discountLevel2 = .25; //discount for level 2
 
 	//Define commission schedule for stocks below price point:
 	lowerBase = 20; //base commission
@@ -91,9 +91,69 @@ int main()
 		return 1;
 	}
 
-	//Calculation of Discount 
+	//Calculation of principal
+	principal = numShares * sharePrice;
 
-	cout << "---" << endl << "Net amount for " << clientName << " is $" << finalCommission;
+	//Calculation of Commission
+	if (sharePrice >= pricePoint)
+	{
+		commission = numShares * upperCommission;
+		if (commission < upperFloor)
+		{
+			commission = 25;
+		}
+	}
+	if (sharePrice < pricePoint)
+	{
+		commission = lowerBase + (lowerCommission * (principal));
+	}
+	
+	//Calculation of Discount
+	if (sharePrice >= pricePoint)
+	{
+		if (priorTransactions >= level1Base && priorTransactions < level2Base)
+		{
+			discount = commission * discountLevel1;
+			cout << "Discount of: " << discountLevel1;
+		}
+		else if (priorTransactions >= level2Base)
+		{
+			discount = commission * discountLevel2;
+			cout << "Discount of : " << discountLevel2;
+		}
+	}
+	if (sharePrice < pricePoint)
+	{
+		discount = 0;
+	}
+
+	//Final check to see if commission is greater than principal
+	commission = commission - discount;
+	if (commission > principal)
+	{
+		commission = principal;
+	}
+
+	//Calculation of net amount
+	if (transactionType == "b")
+	{
+		netAmount = principal + commission;
+	}
+	else if (transactionType == "s")
+	{
+		netAmount = principal - commission;
+	}
+	else
+	{
+		cout << "---" << endl << "You shouldn't be here Ivan";
+		return 1;
+	}
+
+	cout << fixed << setprecision(2); //set to 2 digits after decimal point
+
+	cout << "---" << endl << "Commission = " << commission << endl << "Principal = " << principal << endl;
+	//Final output to user
+	cout << "---" << endl << "Net amount for " << clientName << " is $" << netAmount << endl;
 	system("PAUSE");
 	return 0;
 }
